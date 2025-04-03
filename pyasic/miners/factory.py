@@ -988,11 +988,11 @@ class MinerFactory:
         return_raw: bool = False,
         protocol: str = "http",
         verify: bool = True,
-        follow_redirects: bool =False,
+        follow_redirects: bool = False,
     ) -> Union[dict, str, None]:
         async with httpx.AsyncClient(
-                transport=settings.transport(verify=verify),
-                follow_redirects=follow_redirects,
+            transport=settings.transport(verify=verify),
+            follow_redirects=follow_redirects,
         ) as session:
             try:
                 data = await session.get(
@@ -1175,7 +1175,7 @@ class MinerFactory:
     def _parse_web_miner_model(miner_type: MinerTypes, payload: str) -> str | None:
         if miner_type == MinerTypes.WHATSMINER:
             return re.findall(
-                r'<td[^>]*>\s*WhatsMiner\s+([A-Za-z0-9_]+)\s*</td>',
+                r"<td[^>]*>\s*WhatsMiner\s+([A-Za-z0-9_]+)\s*</td>",
                 payload,
             )[0]
         return None
@@ -1201,13 +1201,17 @@ class MinerFactory:
 
         auth_cookies = None
 
-        async with httpx.AsyncClient(transport=settings.transport(verify=False)) as session:
+        async with httpx.AsyncClient(
+            transport=settings.transport(verify=False)
+        ) as session:
             try:
                 auth = await session.post(
                     f"https://{ip}/cgi-bin/luci/",
                     data={
                         "luci_username": "admin",
-                        "luci_password": settings.get("default_whatsminer_web_password", "admin"),
+                        "luci_password": settings.get(
+                            "default_whatsminer_web_password", "admin"
+                        ),
                     },
                 )
                 if auth.status_code != 302:
@@ -1223,7 +1227,9 @@ class MinerFactory:
             return request
 
         raw_payload = await self.send_web_command(
-            ip, "/cgi-bin/luci/admin/status/overview", auth=FunctionAuth(set_auth_cookie),
+            ip,
+            "/cgi-bin/luci/admin/status/overview",
+            auth=FunctionAuth(set_auth_cookie),
             return_raw=True,
             protocol="https",
             verify=False,

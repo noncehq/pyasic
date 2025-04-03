@@ -455,7 +455,11 @@ class BTMiner(StockFirmware):
                             HashBoard(slot=asc, expected_chips=self.expected_chips)
                         )
                         self.expected_hashboards += 1
-                    hashboards[asc].chip_temp = round(board.get("Chip Temp Avg")) if "Chip Temp Avg" in board else None
+                    hashboards[asc].chip_temp = (
+                        round(board.get("Chip Temp Avg"))
+                        if "Chip Temp Avg" in board
+                        else None
+                    )
                     hashboards[asc].temp = round(board["Temperature"])
                     hashboards[asc].hashrate = self.algo.hashrate(
                         rate=float(board["MHS 1m"]), unit=self.algo.unit.MH
@@ -491,7 +495,7 @@ class BTMiner(StockFirmware):
 
         if rpc_summary is not None:
             if "SUMMARY" not in rpc_summary:
-                rpc_summary['SUMMARY'] = [rpc_summary["Msg"]]
+                rpc_summary["SUMMARY"] = [rpc_summary["Msg"]]
             try:
                 rpc_summary = self._normalize_summary(rpc_summary)
                 wattage = rpc_summary["SUMMARY"][0]["Power"]
@@ -621,7 +625,7 @@ class BTMiner(StockFirmware):
                     expected_hashrate = rpc_summary["SUMMARY"][0]["Factory GHS"]
                 else:
                     edevs = await self.rpc.edevs()
-                    expected_hashrate = sum(dev['Factory GHS'] for dev in edevs["DEVS"])
+                    expected_hashrate = sum(dev["Factory GHS"] for dev in edevs["DEVS"])
                 if expected_hashrate and expected_hashrate > 0:
                     return self.algo.hashrate(
                         rate=float(expected_hashrate), unit=self.algo.unit.GH
