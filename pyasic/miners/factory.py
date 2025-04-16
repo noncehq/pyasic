@@ -1172,10 +1172,13 @@ class MinerFactory:
     @staticmethod
     def _parse_web_miner_model(miner_type: MinerTypes, payload: str) -> str | None:
         if miner_type == MinerTypes.WHATSMINER:
-            return re.findall(
-                r"<td[^>]*>\s*WhatsMiner\s+([A-Za-z0-9_]+)\s*</td>",
-                payload,
-            )[0]
+            try:
+                return re.findall(
+                    r"<td[^>]*>\s*WhatsMiner\s+([A-Za-z0-9_]+)\s*</td>",
+                    payload,
+                )[0]
+            except IndexError:
+                return None
         return None
 
     async def get_miner_model_whatsminer(self, ip: str) -> str | None:
