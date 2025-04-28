@@ -720,6 +720,7 @@ class BTMiner(StockFirmware):
                     url = pool_info.get("URL")
                     pool_url = PoolUrl.from_str(url) if url else None
                     pool_data = PoolMetrics(
+                        last_share_ts=pool_info.get("Last Share Time", 0),
                         accepted=pool_info.get("Accepted"),
                         rejected=pool_info.get("Rejected"),
                         get_failures=pool_info.get("Get Failures"),
