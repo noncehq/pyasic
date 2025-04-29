@@ -287,6 +287,7 @@ class AntminerModern(BMMiner):
                     )
                     hashboards[board["index"]].serial_number = board["sn"]
                     hashboards[board["index"]].missing = False
+                    hashboards[board["index"]].chip_frequency = board["freq_avg"]
             except LookupError:
                 pass
         return hashboards

@@ -467,6 +467,7 @@ class BTMiner(StockFirmware):
                     hashboards[asc].chips = board["Effective Chips"]
                     hashboards[asc].serial_number = board["PCB SN"]
                     hashboards[asc].missing = False
+                    hashboards[asc].chip_frequency = board["Chip Frequency"]
             except LookupError:
                 pass
 
