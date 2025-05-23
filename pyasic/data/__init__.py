@@ -16,9 +16,10 @@
 import copy
 import time
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_serializer
+from pydantic.main import IncEx
 
 from pyasic.config import MinerConfig
 from pyasic.config.mining import MiningModePowerTune
@@ -193,6 +194,10 @@ class MinerData(BaseModel):
             if isinstance(item, bool):
                 setattr(cp, key, item & other_item)
         return cp
+
+    @field_serializer("errors")
+    def serialize_errors(self, errors: list[BaseMinerError]):
+        return [err.model_dump() for err in errors]
 
     @computed_field  # type: ignore[misc]
     @property
