@@ -422,7 +422,7 @@ class AntminerModern(BMMiner):
                 )
                 return int(last_share_datetime.timestamp())
             except ValueError:
-                logging.warning(f"Failed to parse last share time: {last_share_time}")
+                logging.debug(f"Failed to parse last share time: {last_share_time}")
         return 0
 
     async def _get_pools(self, rpc_pools: dict = None) -> List[PoolMetrics]:
