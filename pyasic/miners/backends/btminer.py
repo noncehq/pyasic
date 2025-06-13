@@ -524,7 +524,7 @@ class BTMiner(StockFirmware):
                 rpc_summary["SUMMARY"] = [rpc_summary["Msg"]]
             try:
                 rpc_summary = self._normalize_summary(rpc_summary)
-                wattage = rpc_summary["SUMMARY"][0]["Power"]
+                wattage = int(rpc_summary["SUMMARY"][0]["Power"])
                 return wattage if not wattage == -1 else None
             except LookupError:
                 pass
@@ -539,7 +539,7 @@ class BTMiner(StockFirmware):
         if rpc_summary is not None:
             try:
                 rpc_summary = self._normalize_summary(rpc_summary)
-                return rpc_summary["SUMMARY"][0]["Power Limit"]
+                return int(rpc_summary["SUMMARY"][0]["Power Limit"])
             except LookupError:
                 pass
 
