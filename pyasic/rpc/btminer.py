@@ -580,7 +580,7 @@ class BTMinerRPCAPI(BaseMinerRPCAPI):
         if not ready.get("Msg") == "ready":
             raise APIError(f"Not ready for firmware update: {self}")
         file_size = struct.pack("<I", len(firmware))
-        await self._send_bytes(file_size + firmware)
+        await self._send_bytes(file_size + firmware, timeout=100)
         return True
 
     async def reboot(self, timeout: int = 10) -> dict:
