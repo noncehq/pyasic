@@ -51,6 +51,7 @@ class BaseMinerRPCAPI:
         parameters: Union[str, int, bool] = None,
         ignore_errors: bool = False,
         allow_warning: bool = True,
+        timeout: int = 10,
         **kwargs,
     ) -> dict:
         """Send an API command to the miner and return the result.
@@ -60,6 +61,7 @@ class BaseMinerRPCAPI:
             parameters: Any additional parameters to be sent with the command.
             ignore_errors: Whether to raise APIError when the command returns an error.
             allow_warning: Whether to warn if the command fails.
+            timeout: The timeout for the command in seconds.
 
         Returns:
             The return data from the API command parsed from JSON into a dict.
@@ -76,7 +78,7 @@ class BaseMinerRPCAPI:
             cmd["parameter"] = parameters
 
         # send the command
-        data = await self._send_bytes(json.dumps(cmd).encode("utf-8"))
+        data = await self._send_bytes(json.dumps(cmd).encode("utf-8"), timeout=timeout)
 
         if data is None:
             raise APIError("No data returned from the API.")
