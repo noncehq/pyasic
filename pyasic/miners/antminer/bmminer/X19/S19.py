@@ -19,6 +19,7 @@ from pyasic.miners.device.models import (
     S19,
     S19L,
     S19XP,
+    S19XPHydro,
     S19a,
     S19aPro,
     S19Hydro,
@@ -89,6 +90,10 @@ class BMMinerS19ProHydro(AntminerModern, S19ProHydro):
 
 
 class BMMinerS19Hydro(AntminerModern, S19Hydro):
+    pass
+
+
+class BMMinerS19XPHydro(AntminerModern, S19XPHydro):
     pass
 
 
