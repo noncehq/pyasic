@@ -18,6 +18,7 @@ from .S19 import (
     S19,
     S19L,
     S19XP,
+    S19XPHydro,
     S19a,
     S19aPro,
     S19Hydro,
