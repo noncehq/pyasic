@@ -38,17 +38,41 @@ class AntminerModernWebAPI(BaseWebAPI):
         self.username = "root"
         self.pwd = settings.get("default_antminer_web_password", "root")
 
-    @staticmethod
-    def _should_use_form_data(command: str) -> bool:
-        """Determine if the command should use form data instead of JSON.
+    async def _update_firmware(self, file: Path, **parameters) -> dict:
+        """Upload a firmware file to the Antminer device.
 
         Args:
-            command (str): The command to check.
+            file (Path): Path to the firmware file to be uploaded.
 
         Returns:
-            bool: True if the command should use form data, False otherwise.
+            dict: A dictionary response from the device after the upload.
         """
-        return command in ["upgrade"]
+        command = "upgrade"
+
+        async with aiofiles.open(file, "rb") as firmware:
+            file_content = await firmware.read()
+
+        url = f"http://{self.ip}:{self.port}/cgi-bin/{command}.cgi"
+        auth = httpx.DigestAuth(self.username, self.pwd)
+        try:
+            async with httpx.AsyncClient(transport=settings.transport()) as client:
+                data = await client.post(
+                    url,
+                    auth=auth,
+                    timeout=settings.get("api_function_timeout", 120),
+                    files={"firmware": (file.name, file_content, "application/octet-stream")},
+                    data=parameters,
+                )
+        except httpx.HTTPError as e:
+            return {"success": False, "message": f"HTTP error occurred: {type(e), str(e)}"}
+        else:
+            if data.status_code == 200:
+                try:
+                    return data.json()
+                except json.decoder.JSONDecodeError:
+                    return {"success": False, "message": "Failed to decode JSON"}
+        return {"success": False, "message": "Unknown error occurred"}
+
 
     async def send_command(
         self,
@@ -76,21 +100,12 @@ class AntminerModernWebAPI(BaseWebAPI):
             async with httpx.AsyncClient(transport=settings.transport()) as client:
 
                 if parameters:
-                    if self._should_use_form_data(command):
-                        # Use form data for specific commands like 'upgrade'
-                        data = await client.post(
-                            url,
-                            auth=auth,
-                            timeout=settings.get("api_function_timeout", 3),
-                            data=parameters,
-                        )
-                    else:
-                        data = await client.post(
-                            url,
-                            auth=auth,
-                            timeout=settings.get("api_function_timeout", 120),
-                            json=parameters,
-                        )
+                    data = await client.post(
+                        url,
+                        auth=auth,
+                        timeout=settings.get("api_function_timeout", 3),
+                        json=parameters,
+                    )
                 else:
                     data = await client.get(url, auth=auth)
         except httpx.HTTPError as e:
@@ -265,16 +280,10 @@ class AntminerModernWebAPI(BaseWebAPI):
     async def update_firmware(self, file: Path, keep_settings: bool = True) -> dict:
         """Perform a system update by uploading a firmware file and sending a command to initiate the update."""
 
-        async with aiofiles.open(file, "rb") as firmware:
-            file_content = await firmware.read()
-
         parameters = {
-            "file": (file.name, file_content, "application/octet-stream"),
-            "filename": file.name,
             "keep_settings": keep_settings,
         }
-
-        return await self.send_command(command="upgrade", **parameters)
+        return await self._update_firmware(file, **parameters)
 
 
 class AntminerOldWebAPI(BaseWebAPI):
