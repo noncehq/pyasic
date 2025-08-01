@@ -88,7 +88,7 @@ class AntminerModernWebAPI(BaseWebAPI):
                         data = await client.post(
                             url,
                             auth=auth,
-                            timeout=settings.get("api_function_timeout", 60),
+                            timeout=settings.get("api_function_timeout", 120),
                             json=parameters,
                         )
                 else:
