@@ -38,6 +38,42 @@ class AntminerModernWebAPI(BaseWebAPI):
         self.username = "root"
         self.pwd = settings.get("default_antminer_web_password", "root")
 
+    async def _update_firmware(self, file: Path, **parameters) -> dict:
+        """Upload a firmware file to the Antminer device.
+
+        Args:
+            file (Path): Path to the firmware file to be uploaded.
+
+        Returns:
+            dict: A dictionary response from the device after the upload.
+        """
+        command = "upgrade"
+
+        async with aiofiles.open(file, "rb") as firmware:
+            file_content = await firmware.read()
+
+        url = f"http://{self.ip}:{self.port}/cgi-bin/{command}.cgi"
+        auth = httpx.DigestAuth(self.username, self.pwd)
+        try:
+            async with httpx.AsyncClient(transport=settings.transport()) as client:
+                data = await client.post(
+                    url,
+                    auth=auth,
+                    timeout=settings.get("api_function_timeout", 120),
+                    files={"firmware": (file.name, file_content, "application/octet-stream")},
+                    data=parameters,
+                )
+        except httpx.HTTPError as e:
+            return {"success": False, "message": f"HTTP error occurred: {type(e), str(e)}"}
+        else:
+            if data.status_code == 200:
+                try:
+                    return data.json()
+                except json.decoder.JSONDecodeError:
+                    return {"success": False, "message": "Failed to decode JSON"}
+        return {"success": False, "message": "Unknown error occurred"}
+
+
     async def send_command(
         self,
         command: str | bytes,
@@ -73,7 +109,7 @@ class AntminerModernWebAPI(BaseWebAPI):
                 else:
                     data = await client.get(url, auth=auth)
         except httpx.HTTPError as e:
-            return {"success": False, "message": f"HTTP error occurred: {str(e)}"}
+            return {"success": False, "message": f"HTTP error occurred: {type(e), str(e)}"}
         else:
             if data.status_code == 200:
                 try:
@@ -240,6 +276,14 @@ class AntminerModernWebAPI(BaseWebAPI):
             ipPro=protocol,
             ipSub=subnet_mask,
         )
+
+    async def update_firmware(self, file: Path, keep_settings: bool = True) -> dict:
+        """Perform a system update by uploading a firmware file and sending a command to initiate the update."""
+
+        parameters = {
+            "keep_settings": keep_settings,
+        }
+        return await self._update_firmware(file, **parameters)
 
 
 class AntminerOldWebAPI(BaseWebAPI):
