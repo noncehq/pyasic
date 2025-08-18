@@ -51,8 +51,7 @@ class AntminerModels(MinerModelType):
     S19a = "S19a"
     S19aPro = "S19a Pro"
     S19Hydro = "S19 Hydro"
-    # S19ProHydro = "S19 Pro Hydro" # pyasic official version is this one
-    S19ProHydro = "S19 Pro Hyd."    # hashing version
+    S19ProHydro = "S19 Pro Hydro"
     S19ProPlusHydro = "S19 Pro+ Hydro"
     S19KPro = "S19K Pro"
     S19kPro = "S19k Pro"
