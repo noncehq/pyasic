@@ -240,6 +240,16 @@ class BTMiner(StockFirmware):
             # cannot update, no API access usually
             pass
 
+
+    @staticmethod
+    def _get_summary_content(summary: dict):
+        if "SUMMARY" in summary:
+            return summary["SUMMARY"][0]
+        elif "Msg" in summary:
+            return summary["Msg"]
+        else:
+            raise LookupError("No SUMMARY or Msg in summary data")
+
     async def get_config(self) -> MinerConfig:
         pools = None
         summary = None
@@ -270,8 +280,9 @@ class BTMiner(StockFirmware):
 
         if summary is not None:
             mining_mode = None
+            summary_content = self._get_summary_content(summary)
             try:
-                mining_mode = summary["SUMMARY"][0]["Power Mode"]
+                mining_mode = summary_content["Power Mode"]
             except LookupError:
                 pass
 
@@ -281,18 +292,9 @@ class BTMiner(StockFirmware):
             elif mining_mode == "Low":
                 cfg.mining_mode = MiningModeConfig.low()
                 return cfg
-            try:
-                power_lim = summary["SUMMARY"][0]["Power Limit"]
-            except LookupError:
-                power_lim = None
-
-            if power_lim is None:
+            else:
                 cfg.mining_mode = MiningModeConfig.normal()
                 return cfg
-
-            cfg.mining_mode = MiningModeConfig.power_tuning(power=power_lim)
-            self.config = cfg
-            return self.config
 
     async def set_power_limit(self, wattage: int) -> bool:
         try:
